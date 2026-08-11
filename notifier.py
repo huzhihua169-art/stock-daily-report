@@ -68,17 +68,53 @@ def _pushplus_push(token, title, md_text):
     return 1
 
 
+# ---------- 飞书 ----------
+
+def _feishu_send(webhook, content, title=""):
+    """飞书自定义机器人：interactive卡片+lark_md，原生渲染markdown"""
+    body = {
+        "msg_type": "interactive",
+        "card": {
+            "config": {"wide_screen_mode": True},
+            "header": {"title": {"tag": "plain_text", "content": title or "A股推送"},
+                       "template": "blue"},
+            "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": content}}],
+        },
+    }
+    resp = _http_json(webhook, body)
+    if resp.get("code") != 0:
+        raise RuntimeError(f"飞书推送失败: {resp}")
+    return resp
+
+
+def _feishu_push(webhook, title, md_text):
+    """飞书单条≤20KB；markdown全量塞卡片，超限才分段"""
+    MAX_FS = 18000  # 留余量给卡片结构
+    full = md_text
+    if len(full.encode("utf-8")) <= MAX_FS:
+        _feishu_send(webhook, full, title)
+        return 1
+    chunks = _split_utf8(full, MAX_FS)
+    for i, chunk in enumerate(chunks):
+        header = title if i == 0 else f"{title}（{i+1}/{len(chunks)}）"
+        _feishu_send(webhook, chunk, header)
+    return len(chunks)
+
+
 # ---------- 统一入口 ----------
 
 def push_report(title, md_text):
     """自动识别通道推送报告。
-    优先级：PUSHPLUS_TOKEN > WECOM_WEBHOOK_URL。返回 (通道, 分段数)。
-    两者都无则返回 ("none", 0)。
+    优先级：PUSHPLUS_TOKEN > FEISHU_WEBHOOK_URL > WECOM_WEBHOOK_URL。
+    返回 (通道, 分段数)。都无则 ("none", 0)。
     """
     token = os.environ.get("PUSHPLUS_TOKEN", "")
+    feishu = os.environ.get("FEISHU_WEBHOOK_URL", "")
     webhook = os.environ.get("WECOM_WEBHOOK_URL", "")
     if token:
         return "pushplus", _pushplus_push(token, title, md_text)
+    if feishu:
+        return "feishu", _feishu_push(feishu, title, md_text)
     if webhook:
         return "wecom", _wecom_push(webhook, title, md_text)
     return "none", 0

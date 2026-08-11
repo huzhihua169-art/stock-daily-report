@@ -75,7 +75,8 @@ def fmt_news(news):
 def main():
     webhook = os.environ.get("WECOM_WEBHOOK_URL")
     if not webhook:
-        print("缺少 WECOM_WEBHOOK_URL"); sys.exit(1)
+        print("[warn] 缺少 WECOM_WEBHOOK_URL，降级为DRY_RUN（仅生成+存档，不推送）")
+        os.environ["DRY_RUN"] = "1"
 
     print("[1/4] 检查交易日...")
     if not data_fetcher.is_trading_day() and os.environ.get("FORCE_RUN") != "1":

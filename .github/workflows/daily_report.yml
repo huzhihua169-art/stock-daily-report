@@ -43,6 +43,7 @@ jobs:
       - name: 生成并推送报告
         env:
           WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           WATCHLIST: ${{ vars.WATCHLIST }}
           FORCE_RUN: ${{ inputs.force || '0' }}

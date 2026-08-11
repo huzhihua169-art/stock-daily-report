@@ -1,21 +1,16 @@
-"""企业微信群机器人推送模块（markdown，超长自动分段）"""
+"""消息推送模块：支持企业微信群机器人 / PushPlus(个人微信) 双通道
+- 企微：webhook 以 https://qyapi.weixin.qq.com 开头，markdown 分段推送
+- PushPlus：token 形式，直达个人微信，免费200条/天，html/markdown
+"""
 import json
+import os
+import urllib.parse
 import urllib.request
 
 MAX_BYTES = 4000  # 企微单条上限4096字节，留余量
 
 
-def _send(webhook, content):
-    body = json.dumps({"msgtype": "markdown", "markdown": {"content": content}},
-                      ensure_ascii=False).encode("utf-8")
-    req = urllib.request.Request(webhook, data=body,
-                                 headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=15) as r:
-        resp = json.loads(r.read().decode("utf-8"))
-    if resp.get("errcode") != 0:
-        raise RuntimeError(f"企微推送失败: {resp}")
-    return resp
-
+# ---------- 工具 ----------
 
 def _split_utf8(text, max_bytes=MAX_BYTES):
     """按UTF-8字节数切分，不在多字节字符中间切断"""
@@ -31,24 +26,70 @@ def _split_utf8(text, max_bytes=MAX_BYTES):
     return chunks
 
 
-def push_markdown(webhook, title, md_text):
-    """推送markdown到企微群，超长自动分段，返回分段数"""
+def _http_json(url, body, timeout=15):
+    req = urllib.request.Request(url, data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode("utf-8"))
+
+
+# ---------- 企微 ----------
+
+def _wecom_send(webhook, content, msgtype="markdown"):
+    resp = _http_json(webhook, {"msgtype": msgtype, msgtype: {"content": content}})
+    if resp.get("errcode") != 0:
+        raise RuntimeError(f"企微推送失败: {resp}")
+    return resp
+
+
+def _wecom_push(webhook, title, md_text):
     full = f"## {title}\n\n{md_text}" if title else md_text
     chunks = _split_utf8(full)
     for i, chunk in enumerate(chunks):
         content = chunk if i == 0 else f"（续 {i+1}/{len(chunks)}）\n" + chunk
-        _send(webhook, content)
+        _wecom_send(webhook, content)
     return len(chunks)
 
 
-def push_text(webhook, text):
-    """纯文本推送（用于告警/测试）"""
-    body = json.dumps({"msgtype": "text", "text": {"content": text}},
-                      ensure_ascii=False).encode("utf-8")
-    req = urllib.request.Request(webhook, data=body,
-                                 headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=15) as r:
-        resp = json.loads(r.read().decode("utf-8"))
-    if resp.get("errcode") != 0:
-        raise RuntimeError(f"企微推送失败: {resp}")
+# ---------- PushPlus ----------
+
+def _pushplus_send(token, title, content, template="markdown"):
+    url = "https://www.pushplus.plus/send"
+    resp = _http_json(url, {"token": token, "title": title, "content": content,
+                            "template": template})
+    if resp.get("code") != 200:
+        raise RuntimeError(f"PushPlus推送失败: {resp}")
     return resp
+
+
+def _pushplus_push(token, title, md_text):
+    """PushPlus单条上限约10万字符，一般不需要分段"""
+    _pushplus_send(token, title, md_text)
+    return 1
+
+
+# ---------- 统一入口 ----------
+
+def push_report(title, md_text):
+    """自动识别通道推送报告。
+    优先级：PUSHPLUS_TOKEN > WECOM_WEBHOOK_URL。返回 (通道, 分段数)。
+    两者都无则返回 ("none", 0)。
+    """
+    token = os.environ.get("PUSHPLUS_TOKEN", "")
+    webhook = os.environ.get("WECOM_WEBHOOK_URL", "")
+    if token:
+        return "pushplus", _pushplus_push(token, title, md_text)
+    if webhook:
+        return "wecom", _wecom_push(webhook, title, md_text)
+    return "none", 0
+
+
+def push_text(text):
+    """纯文本推送（测试/告警），按通道自动路由"""
+    token = os.environ.get("PUSHPLUS_TOKEN", "")
+    webhook = os.environ.get("WECOM_WEBHOOK_URL", "")
+    if token:
+        return "pushplus", _pushplus_send(token, "测试", text, template="text")
+    if webhook:
+        return "wecom", _wecom_send(webhook, text, msgtype="text")
+    return "none", 0

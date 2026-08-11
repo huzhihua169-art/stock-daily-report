@@ -74,8 +74,8 @@ def fmt_news(news):
 
 def main():
     webhook = os.environ.get("WECOM_WEBHOOK_URL", "")
-    if not webhook and not os.environ.get("PUSHPLUS_TOKEN", ""):
-        print("[warn] 缺少推送通道（WECOM_WEBHOOK_URL/PUSHPLUS_TOKEN），降级为DRY_RUN")
+    if not (webhook or os.environ.get("PUSHPLUS_TOKEN", "") or os.environ.get("FEISHU_WEBHOOK_URL", "")):
+        print("[warn] 缺少推送通道（PUSHPLUS_TOKEN/FEISHU_WEBHOOK_URL/WECOM_WEBHOOK_URL），降级为DRY_RUN")
         os.environ["DRY_RUN"] = "1"
 
     print("[1/4] 检查交易日...")

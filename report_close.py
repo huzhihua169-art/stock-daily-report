@@ -40,9 +40,9 @@ PROMPT_TEMPLATE = """今天是{date}（{weekday}），A股已收盘。请基于�
 
 
 def main():
-    webhook = os.environ.get("WECOM_WEBHOOK_URL")
-    if not webhook:
-        print("[warn] 缺少 WECOM_WEBHOOK_URL，降级为DRY_RUN（仅生成+存档，不推送）")
+    webhook = os.environ.get("WECOM_WEBHOOK_URL", "")
+    if not webhook and not os.environ.get("PUSHPLUS_TOKEN", ""):
+        print("[warn] 缺少推送通道（WECOM_WEBHOOK_URL/PUSHPLUS_TOKEN），降级为DRY_RUN")
         os.environ["DRY_RUN"] = "1"
 
     print("[1/4] 检查交易日...")
@@ -69,14 +69,13 @@ def main():
     print("[3/4] 调用DeepSeek生成复盘...")
     report = llm.chat(llm.SYSTEM_PROMPT, prompt, max_tokens=8000)
 
-    print("[4/4] 推送企微...")
+    print("[4/4] 推送...")
     title = f"A股收盘复盘 {now.strftime('%m-%d')} 周{weekdays[now.weekday()]}"
     if os.environ.get("DRY_RUN") == "1":
         print("  [DRY_RUN] 跳过推送")
-        n = 0
     else:
-        n = notifier.push_markdown(webhook, title, report)
-        print(f"推送完成（{n}段）")
+        channel, n = notifier.push_report(title, report)
+        print(f"推送完成（通道={channel}，{n}段）")
 
     os.makedirs("archive", exist_ok=True)
     path = f"archive/复盘_{now.strftime('%Y-%m-%d')}.md"

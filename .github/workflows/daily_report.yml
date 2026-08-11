@@ -1,0 +1,62 @@
+name: A股晨报与收盘复盘
+
+on:
+  schedule:
+    # 晨报：北京时间08:30 = UTC 00:30（GitHub cron可能有数分钟延迟）
+    - cron: "30 0 * * 1-5"
+    # 复盘：北京时间15:35 = UTC 07:35（收盘后5分钟，等数据落地）
+    - cron: "35 7 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      report_type:
+        description: "报告类型"
+        required: true
+        default: "morning"
+        type: choice
+        options: [morning, close]
+      force:
+        description: "强制运行（跳过交易日检查）"
+        required: false
+        default: "0"
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 判断报告类型
+        id: rt
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "type=${{ inputs.report_type }}" >> "$GITHUB_OUTPUT"
+          else
+            HOUR=$(date -u +%H)
+            if [ "$HOUR" = "00" ]; then echo "type=morning" >> "$GITHUB_OUTPUT";
+            else echo "type=close" >> "$GITHUB_OUTPUT"; fi
+          fi
+
+      - name: 生成并推送报告
+        env:
+          WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          WATCHLIST: ${{ vars.WATCHLIST }}
+          FORCE_RUN: ${{ inputs.force || '0' }}
+        run: |
+          if [ "${{ steps.rt.outputs.type }}" = "morning" ]; then
+            python report_morning.py
+          else
+            python report_close.py
+          fi
+
+      - name: 存档报告回仓库
+        run: |
+          git config user.name "stock-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add archive/ || true
+          git commit -m "report $(date -u +%Y-%m-%d)" || echo "无新报告"
+          git push || true

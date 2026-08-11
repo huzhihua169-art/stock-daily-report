@@ -1,0 +1,2 @@
+# 零依赖：全部使用Python标准库（urllib/json/re/datetime）
+# 保留此文件以便将来扩展

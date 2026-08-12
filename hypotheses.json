@@ -79,6 +79,86 @@
       "verify_date": "2026-08-13",
       "result": "pending",
       "evidence": ""
+    },
+    {
+      "id": "H20260812-11",
+      "date": "2026-08-12",
+      "hypothesis": "上证指数明日（8/13）收涨或收跌。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-12",
+      "date": "2026-08-12",
+      "hypothesis": "两市合计成交额明日是否大于今日约2.15万亿（放量/缩量）。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-13",
+      "date": "2026-08-12",
+      "hypothesis": "中天科技明日收盘是否站上36.00元（减仓区下沿）。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-14",
+      "date": "2026-08-12",
+      "hypothesis": "百花医药明日是否继续收涨（验证连板持续性）。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-15",
+      "date": "2026-08-12",
+      "hypothesis": "房地产板块明日是否仍出现在板块涨幅榜前10。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-16",
+      "date": "2026-08-12",
+      "hypothesis": "**百花医药（600721，7连板-医疗服务）**：假设明日收<font color=\"warning\">涨</font>。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-17",
+      "date": "2026-08-12",
+      "hypothesis": "**秦安股份（603758，4连板-汽车零部）**：假设明日收<font color=\"warning\">涨</font>。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-18",
+      "date": "2026-08-12",
+      "hypothesis": "**北京文化（000802，3连板-影视院线）**：假设明日收<font color=\"info\">跌</font>。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-19",
+      "date": "2026-08-12",
+      "hypothesis": "**蓝盾光电（300862，3连板-通用设备）**：假设明日收<font color=\"warning\">涨</font>。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-20",
+      "date": "2026-08-12",
+      "hypothesis": "**京投发展（600683，3连板-房地产开）**：假设明日收<font color=\"info\">跌</font>。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
     }
   ]
 }

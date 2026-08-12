@@ -116,6 +116,28 @@ def fmt_dashboard(d):
     return "\n".join(lines)
 
 
+def _bar(score, max_s=100, width=10):
+    """ASCII进度条"""
+    filled = round(score / max_s * width)
+    return "█" * filled + "░" * (width - filled)
+
+
+def fmt_visual(d):
+    """视觉版仪表盘（飞书卡片用）：大信号行 + 进度条分解"""
+    emoji = {"晴": "☀️", "多云": "⛅", "雨": "🌧️"}[d["weather"]]
+    template = {"晴": "green", "多云": "yellow", "雨": "red"}[d["weather"]]
+    lines = [
+        f"## {emoji} {d['weather']} {d['score']}/100　{d['signal']}",
+        "",
+        f"```\n综合 {_bar(d['score'])} {d['score']}\n```",
+    ]
+    for k, (s, note) in d["parts"].items():
+        max_s = {"趋势": 30, "量能": 25, "情绪": 25, "宽度": 20}[k]
+        icon = "🟢" if s >= max_s * 0.6 else ("🟡" if s >= max_s * 0.3 else "🔴")
+        lines.append(f"{icon} **{k}** {_bar(s, max_s, 6)} {s}分（{note}）")
+    return template, "\n".join(lines)
+
+
 if __name__ == "__main__":
     import data_fetcher
     st = data_fetcher.get_market_stats()

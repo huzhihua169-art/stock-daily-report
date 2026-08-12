@@ -27,11 +27,21 @@ def _save(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def _clean(text):
+    """清洗LLM输出中的飞书font标签等杂质"""
+    import re
+    text = re.sub(r"<font[^>]*>|</font>", "", text)
+    return text.strip()
+
+
 def add_hypotheses(hyps):
     """hyps: [(hypothesis_text, days_to_verify), ...]"""
     data = _load()
     today = datetime.now().strftime("%Y-%m-%d")
     for text, days in hyps:
+        text = _clean(text)
+        if len(text) < 4:
+            continue
         vid = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
         data["items"].append({
             "id": f"H{today.replace('-', '')}-{len(data['items'])+1}",

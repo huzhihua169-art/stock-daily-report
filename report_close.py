@@ -106,9 +106,9 @@ def main():
 
     # 从复盘报告的"明日验证清单"提取假设存入追踪表
     import re
-    m = re.search(r"[一二三四五六七八九十]、\s*明日验证清单\s*\n(.*?)(?=\n\s*[一二三四五六七八九十]、|\Z)", report, re.S)
+    m = re.search(r"(?:[一二三四五六七八九十]、|#+\s*[0-9.]*\s*)\s*明日验证清单\s*\n(.*?)(?=\n\s*(?:[一二三四五六七八九十]、|#+\s*[0-9.]*\s*)|$)", report, re.S)
     if not m:
-        m = re.search(r"明日验证清单\s*\n(.*?)(?=\n\s*[一二三四五六七八九十]、|\Z)", report, re.S)
+        m = re.search(r"明日验证清单\s*\n(.*?)(?=\n\s*(?:[一二三四五六七八九十]、|#+\s*[0-9.]*\s*)|$)", report, re.S)
     if m:
         items = [ln.strip().lstrip("0123456789.、) ") for ln in m.group(1).split("\n")
                  if ln.strip() and not ln.strip().startswith(("```", "⚠️", "*", "- **"))]

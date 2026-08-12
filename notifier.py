@@ -87,6 +87,34 @@ def _feishu_send(webhook, content, title=""):
     return resp
 
 
+def feishu_card(webhook, title, template, elements_md, note=""):
+    """结构化飞书卡片：header颜色+多元素+底部注释
+    template: green/yellow/red/blue（按天气变色）
+    elements_md: markdown字符串列表，每个是一个元素
+    """
+    els = []
+    for md in elements_md:
+        els.append({"tag": "div", "text": {"tag": "lark_md", "content": md}})
+        els.append({"tag": "hr"})
+    els = els[:-1] if els else []  # 去掉最后的hr
+    if note:
+        els.append({"tag": "hr"})
+        els.append({"tag": "note", "elements": [{"tag": "plain_text", "content": note}]})
+    body = {
+        "msg_type": "interactive",
+        "card": {
+            "config": {"wide_screen_mode": True},
+            "header": {"title": {"tag": "plain_text", "content": title},
+                       "template": template},
+            "elements": els,
+        },
+    }
+    resp = _http_json(webhook, body)
+    if resp.get("code") != 0:
+        raise RuntimeError(f"飞书推送失败: {resp}")
+    return resp
+
+
 def _feishu_push(webhook, title, md_text):
     """飞书单条≤20KB；markdown全量塞卡片，超限才分段"""
     MAX_FS = 18000  # 留余量给卡片结构
@@ -125,6 +153,26 @@ def push_report(title, md_text):
             print(f"[warn] {name}通道失败: {e}")
             continue
     return "none", 0
+
+
+def push_visual(title, template, signal_md, lights_md, body_md, note=""):
+    """结构化视觉推送（目前仅飞书，其他通道降级为纯文本拼接）。
+    返回 (通道, 分段数)。"""
+    feishu = os.environ.get("FEISHU_WEBHOOK_URL", "")
+    if feishu:
+        MAX_FS = 16000
+        if len(body_md.encode("utf-8")) <= MAX_FS:
+            return "feishu", feishu_card(feishu, title, template,
+                                       [signal_md, lights_md, body_md], note) and 1
+        # 超长：卡片+后续文字段
+        feishu_card(feishu, title, template, [signal_md, lights_md], note)
+        chunks = _split_utf8(body_md, MAX_FS)
+        for i, c in enumerate(chunks):
+            _feishu_send(feishu, c, f"{title}（续{i+1}/{len(chunks)}）")
+        return "feishu", 1 + len(chunks)
+    # 其他通道降级
+    combined = f"{signal_md}\n\n{lights_md}\n\n{body_md}"
+    return push_report(title, combined)
 
 
 def push_text(text):

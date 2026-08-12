@@ -122,7 +122,10 @@ def main():
     if os.environ.get("DRY_RUN") == "1":
         print("  [DRY_RUN] 跳过推送")
     else:
-        channel, n = notifier.push_report(title, report)
+        template, signal_md = market_dashboard.fmt_visual(dash)
+        channel, n = notifier.push_visual(
+            title, template, signal_md, lights, report,
+            note=f"数据 {d['now']} | 模型 {llm.MODEL} | 仅供研究参考")
         print(f"推送完成（通道={channel}，{n}段）")
 
     os.makedirs("archive", exist_ok=True)

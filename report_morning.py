@@ -1,11 +1,13 @@
-"""晨报生成：数据 → DeepSeek → markdown → 企微推送 + 存档"""
+"""晨报生成：数据 → 信号仪表盘 → DeepSeek → markdown → 推送 + 存档"""
 import json
 import os
 import sys
 from datetime import datetime
 
 import data_fetcher
+import holdings_lights
 import llm
+import market_dashboard
 import notifier
 
 # 自选股观察池（新浪代码格式），与WorkBuddy研究体系同步维护
@@ -14,6 +16,12 @@ WATCHLIST = os.environ.get("WATCHLIST", "sh600519").split(",")
 PROMPT_TEMPLATE = """今天是{date}（{weekday}），请基于以下**实时抓取的数据**生成A股晨报。
 
 ## 原始数据（抓取时间 {fetch_time}）
+
+### 市场信号仪表盘（昨日收盘）
+{dashboard}
+
+### 持仓状态灯
+{lights}
 
 ### 主要指数（上一个交易日收盘）
 {indices}
@@ -33,11 +41,12 @@ PROMPT_TEMPLATE = """今天是{date}（{weekday}），请基于以下**实时抓
 {news}
 
 ## 输出要求（严格按此结构）
-1. **隔夜与盘前要闻**：从新闻中提炼3-5条对今日A股有实质影响的（注明来源和时间）
-2. **昨日市场回顾**：指数表现、量能、板块主线、涨停情绪（数据说话）
-3. **自选观察池**：逐一点评，有触发条件变化的标注
-4. **今日关注点**：事件日历、数据发布、风险提示（条件化表述，不下指令）
-5. **风险雷达**：概率×影响×预警信号，最多4条
+1. **今日信号**：用一句话复述市场信号仪表盘的天气和操作建议，然后解释依据
+2. **隔夜与盘前要闻**：从新闻中提炼3-5条对今日A股有实质影响的（注明来源和时间）
+3. **昨日市场回顾**：指数表现、量能、板块主线、涨停情绪（数据说话）
+4. **自选观察池**：逐一点评，有触发条件变化的标注，对照持仓状态灯
+5. **今日关注点**：事件日历、数据发布、风险提示（条件化表述，不下指令）
+6. **风险雷达**：概率×影响×预警信号，最多4条
 """
 
 
@@ -85,11 +94,17 @@ def main():
     print("[2/4] 抓取数据...")
     d = data_fetcher.collect_market_data(WATCHLIST)
 
+    # 信号仪表盘 + 持仓灯
+    dash = market_dashboard.market_dashboard(d["stats"], d["ztdt"]["zt_total"], d["ztdt"]["dt_total"])
+    lights = holdings_lights.fmt_lights(holdings_lights.holdings_lights(d["watchlist"]))
+
     now = datetime.now()
     weekdays = "一二三四五六日"
     prompt = PROMPT_TEMPLATE.format(
         date=now.strftime("%Y-%m-%d"), weekday=weekdays[now.weekday()],
         fetch_time=d["now"],
+        dashboard=market_dashboard.fmt_dashboard(dash),
+        lights=lights,
         indices=fmt_indices(d["indices"]),
         sectors=fmt_sectors(d["sectors"]),
         zt_total=d["ztdt"]["zt_total"], dt_total=d["ztdt"]["dt_total"],

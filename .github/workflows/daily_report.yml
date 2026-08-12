@@ -19,11 +19,16 @@ on:
         required: false
         default: "0"
 
+permissions:
+  contents: write
+
 jobs:
   report:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - uses: actions/setup-python@v5
         with:
@@ -55,10 +60,10 @@ jobs:
             python report_close.py
           fi
 
-      - name: 存档报告回仓库
+      - name: 存档报告与假设追踪表回仓库
         run: |
           git config user.name "stock-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add archive/ || true
-          git commit -m "report $(date -u +%Y-%m-%d)" || echo "无新报告"
-          git push || true
+          git add archive/ hypotheses.json || true
+          git commit -m "report $(date -u +%Y-%m-%d)" || echo "无新提交"
+          git push origin main || echo "push失败（不影响推送）"

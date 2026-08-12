@@ -39,6 +39,46 @@
       "verify_date": "2026-08-13",
       "result": "pending",
       "evidence": ""
+    },
+    {
+      "id": "H20260812-6",
+      "date": "2026-08-12",
+      "hypothesis": "中天科技明日收盘价是否≥34.00元（验证反弹能否延续）。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-7",
+      "date": "2026-08-12",
+      "hypothesis": "贵州茅台明日收盘是否仍站稳1330元上方（验证建仓触发线有效性）。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-8",
+      "date": "2026-08-12",
+      "hypothesis": "通信设备板块明日涨幅是否为正（验证主线持续性）。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-9",
+      "date": "2026-08-12",
+      "hypothesis": "明日两市涨停家数是否仍≥80家（验证情绪是否维持高位）。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260812-10",
+      "date": "2026-08-12",
+      "hypothesis": "城地香江明日是否收跌（验证盘后终止定增利空的消化方向）。",
+      "verify_date": "2026-08-13",
+      "result": "pending",
+      "evidence": ""
     }
   ]
 }

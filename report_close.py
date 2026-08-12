@@ -9,6 +9,7 @@ import holdings_lights
 import llm
 import market_dashboard
 import notifier
+import stock_pool
 from report_morning import (WATCHLIST, fmt_indices, fmt_sectors, fmt_zt,
                             fmt_watch, fmt_news)
 
@@ -42,12 +43,16 @@ PROMPT_TEMPLATE = """今天是{date}（{weekday}），A股已收盘。请基于�
 ### 昨日假设待验证（如有到期未验证项，请结合今日数据给出证实/证伪结论）
 {hypo_due}
 
+### 今日候选股票池（规则筛选，非买卖建议）
+{pool}
+
 ## 输出要求（严格按此结构）
 1. **今日盘面**：指数、量能、涨跌结构、涨停情绪（数据说话）
 2. **主线与异动**：板块主线、资金流入流出方向、值得注意的异动
 3. **自选观察池复盘**：逐一核对——价格变动、是否触及研究卡片中的触发/失效条件（如数据不足则写"需人工核对"）
-4. **纪律检查清单**：提醒今日应记录的事项（交易/未操作理由/是否违反纪律）
-5. **明日验证清单**：不超过5条具体可核验的事项（每一条都必须写成"可对错判断"的假设，如"XX板块明日上涨/下跌"，不要写模糊描述）
+4. **候选池点评**：对候选股票池逐只给出明日可验证的涨跌假设（如"百花医药明日收涨/收跌"），每只一条，必须可对错判断
+5. **纪律检查清单**：提醒今日应记录的事项（交易/未操作理由/是否违反纪律）
+6. **明日验证清单**：不超过5条具体可核验的事项（每一条都必须写成"可对错判断"的假设，如"XX板块明日上涨/下跌"，不要写模糊描述）
 """
 
 
@@ -64,11 +69,12 @@ def main():
     print("[2/4] 抓取收盘数据...")
     d = data_fetcher.collect_market_data(WATCHLIST)
 
-    # 信号仪表盘 + 持仓灯 + 假设验证
+    # 信号仪表盘 + 持仓灯 + 假设验证 + 推荐池
     dash = market_dashboard.market_dashboard(d["stats"], d["ztdt"]["zt_total"], d["ztdt"]["dt_total"])
     lights = holdings_lights.fmt_lights(holdings_lights.holdings_lights(d["watchlist"]))
     due = hypothesis_tracker.verify_due()
     hypo_due = "\n".join(f"- [{i[0]}]({i[1]}) {i[2]}" for i in due) if due else "- 无到期假设"
+    pool, active_hot = stock_pool.recommend_pool(5)
 
     now = datetime.now()
     weekdays = "一二三四五六日"
@@ -85,6 +91,7 @@ def main():
         watchlist=fmt_watch(d["watchlist"]),
         news=fmt_news(d["news"]),
         hypo_due=hypo_due,
+        pool=stock_pool.fmt_pool(pool, active_hot),
     )
 
     print("[3/4] 调用DeepSeek生成复盘...")
@@ -141,6 +148,18 @@ def main():
                     hypothesis_tracker.set_result(hid, "refuted", f"上证{sh_chg:+.2f}%")
                 elif any(w in htext for w in down_words) and sh_chg > 0:
                     hypothesis_tracker.set_result(hid, "refuted", f"上证{sh_chg:+.2f}%")
+
+    # 从"候选池点评"提取推荐假设（带代码，验证更精确）
+    m2 = re.search(r"(?:[一二三四五六七八九十]、|#+\s*[0-9.]*\s*)\s*候选池点评\s*\n(.*?)(?=\n\s*(?:[一二三四五六七八九十]、|#+\s*[0-9.]*\s*)|$)", report, re.S)
+    if m2:
+        pool_hyps = []
+        for ln in m2.group(1).split("\n"):
+            ln = ln.strip().lstrip("0123456789.、) ")
+            if len(ln) > 6 and not ln.startswith(("以下", "说明", "注", "⚠")):
+                pool_hyps.append(ln)
+        if pool_hyps:
+            n2 = hypothesis_tracker.add_hypotheses([(h, 1) for h in pool_hyps[:5]])
+            print(f"已记录{n2}条推荐池假设到追踪表")
         print(f"已自动验证{len(due)}条到期假设")
         print(hypothesis_tracker.weekly_summary())
 

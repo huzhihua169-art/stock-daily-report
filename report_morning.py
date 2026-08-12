@@ -11,7 +11,8 @@ import market_dashboard
 import notifier
 
 # 自选股观察池（新浪代码格式），与WorkBuddy研究体系同步维护
-WATCHLIST = os.environ.get("WATCHLIST", "sh600519").split(",")
+# 只放实际持仓：600522中天科技（600519茅台仅研究卡片，不在此推送）
+WATCHLIST = os.environ.get("WATCHLIST", "sh600522").split(",")
 
 PROMPT_TEMPLATE = """今天是{date}（{weekday}），请基于以下**实时抓取的数据**生成A股晨报。
 

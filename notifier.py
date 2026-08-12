@@ -104,28 +104,45 @@ def _feishu_push(webhook, title, md_text):
 # ---------- 统一入口 ----------
 
 def push_report(title, md_text):
-    """自动识别通道推送报告。
-    优先级：PUSHPLUS_TOKEN > FEISHU_WEBHOOK_URL > WECOM_WEBHOOK_URL。
-    返回 (通道, 分段数)。都无则 ("none", 0)。
+    """自动识别通道推送报告，失败自动降级下一通道。
+    优先级：FEISHU_WEBHOOK_URL > PUSHPLUS_TOKEN > WECOM_WEBHOOK_URL（飞书最稳）。
+    返回 (通道, 分段数)。都失败则 ("none", 0)。
     """
     token = os.environ.get("PUSHPLUS_TOKEN", "")
     feishu = os.environ.get("FEISHU_WEBHOOK_URL", "")
     webhook = os.environ.get("WECOM_WEBHOOK_URL", "")
-    if token:
-        return "pushplus", _pushplus_push(token, title, md_text)
+    attempts = []
     if feishu:
-        return "feishu", _feishu_push(feishu, title, md_text)
+        attempts.append(("feishu", lambda: _feishu_push(feishu, title, md_text)))
+    if token:
+        attempts.append(("pushplus", lambda: _pushplus_push(token, title, md_text)))
     if webhook:
-        return "wecom", _wecom_push(webhook, title, md_text)
+        attempts.append(("wecom", lambda: _wecom_push(webhook, title, md_text)))
+    for name, fn in attempts:
+        try:
+            return name, fn()
+        except Exception as e:
+            print(f"[warn] {name}通道失败: {e}")
+            continue
     return "none", 0
 
 
 def push_text(text):
-    """纯文本推送（测试/告警），按通道自动路由"""
+    """纯文本推送（测试/告警），失败自动降级下一通道"""
     token = os.environ.get("PUSHPLUS_TOKEN", "")
+    feishu = os.environ.get("FEISHU_WEBHOOK_URL", "")
     webhook = os.environ.get("WECOM_WEBHOOK_URL", "")
+    attempts = []
+    if feishu:
+        attempts.append(("feishu", lambda: _feishu_send(feishu, text, "A股推送")))
     if token:
-        return "pushplus", _pushplus_send(token, "测试", text, template="text")
+        attempts.append(("pushplus", lambda: _pushplus_send(token, "测试", text, template="text")))
     if webhook:
-        return "wecom", _wecom_send(webhook, text, msgtype="text")
+        attempts.append(("wecom", lambda: _wecom_send(webhook, text, msgtype="text")))
+    for name, fn in attempts:
+        try:
+            return name, fn()
+        except Exception as e:
+            print(f"[warn] {name}通道失败: {e}")
+            continue
     return "none", 0

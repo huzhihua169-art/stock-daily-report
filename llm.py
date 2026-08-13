@@ -18,6 +18,8 @@ def chat(system_prompt, user_prompt, temperature=0.3, max_tokens=8000):
         "temperature": temperature,
         "max_tokens": max_tokens,
         "stream": False,
+        # 禁用思考模式：V4 Flash默认思考会吃掉全部token导致content为空
+        "thinking": {"type": "disabled"},
     }, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(API_URL, data=body, headers={
         "Content-Type": "application/json",
@@ -28,12 +30,11 @@ def chat(system_prompt, user_prompt, temperature=0.3, max_tokens=8000):
     usage = resp.get("usage") or {}
     msg = resp["choices"][0]["message"]
     content = msg.get("content") or ""
-    # V4 Flash默认思考模式，若content为空则取reasoning_content兜底
-    if not content and msg.get("reasoning_content"):
-        content = msg["reasoning_content"]
+    # 若仍为空（如触发安全拦截），抛错而非推送空内容
+    if not content:
+        raise RuntimeError(f"LLM返回空content: finish={resp['choices'][0].get('finish_reason')}")
     print(f"[LLM] model={MODEL} input={usage.get('prompt_tokens')} "
-          f"output={usage.get('completion_tokens')} "
-          f"reasoning={usage.get('completion_tokens_details', {}).get('reasoning_tokens', 0)}")
+          f"output={usage.get('completion_tokens')}")
     return content
 
 

@@ -1,0 +1,38 @@
+name: 中天科技中报核验（8/28一次性）
+
+on:
+  schedule:
+    # 北京时间8/28 19:30 = UTC 11:30（中报预约披露日当天盘后核验）
+    - cron: "30 11 28 8 *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 核验并推送中报结论
+        env:
+          WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: python verify_h1.py
+
+      - name: 存档核验结果回仓库
+        run: |
+          git config user.name "stock-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add archive/ || true
+          git commit -m "h1 verify $(date -u +%Y-%m-%d)" || echo "无新提交"
+          git push origin main || echo "push失败（不影响推送）"

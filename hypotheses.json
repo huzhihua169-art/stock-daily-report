@@ -5,8 +5,8 @@
       "date": "2026-08-12",
       "hypothesis": "明日通信设备板块收盘涨跌幅为正/为负（今日+3.84%，外盘光通信走强，验证主线持续性）。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-2",
@@ -21,32 +21,32 @@
       "date": "2026-08-12",
       "hypothesis": "明日房地产开发板块是否延续涨幅居前（今日+3.47%，验证地产链异动是一日游还是趋势启动）。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-4",
       "date": "2026-08-12",
       "hypothesis": "明日涨停家数是否≥60家（今日92家，验证情绪是延续还是退潮）。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-5",
       "date": "2026-08-12",
       "hypothesis": "明日上证指数收盘是否站稳3947点上方（今日收3946.68，接近20日线3860上方的强势区）。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-6",
       "date": "2026-08-12",
       "hypothesis": "中天科技明日收盘价是否≥34.00元（验证反弹能否延续）。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-7",
@@ -61,32 +61,32 @@
       "date": "2026-08-12",
       "hypothesis": "通信设备板块明日涨幅是否为正（验证主线持续性）。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-9",
       "date": "2026-08-12",
       "hypothesis": "明日两市涨停家数是否仍≥80家（验证情绪是否维持高位）。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-10",
       "date": "2026-08-12",
       "hypothesis": "城地香江明日是否收跌（验证盘后终止定增利空的消化方向）。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "refuted",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-11",
       "date": "2026-08-12",
       "hypothesis": "上证指数明日（8/13）收涨或收跌。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-12",
@@ -109,54 +109,94 @@
       "date": "2026-08-12",
       "hypothesis": "百花医药明日是否继续收涨（验证连板持续性）。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-15",
       "date": "2026-08-12",
       "hypothesis": "房地产板块明日是否仍出现在板块涨幅榜前10。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-16",
       "date": "2026-08-12",
       "hypothesis": "**百花医药（600721，7连板-医疗服务）**：假设明日收<font color=\"warning\">涨</font>。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-17",
       "date": "2026-08-12",
       "hypothesis": "**秦安股份（603758，4连板-汽车零部）**：假设明日收<font color=\"warning\">涨</font>。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-18",
       "date": "2026-08-12",
       "hypothesis": "**北京文化（000802，3连板-影视院线）**：假设明日收<font color=\"info\">跌</font>。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "refuted",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-19",
       "date": "2026-08-12",
       "hypothesis": "**蓝盾光电（300862，3连板-通用设备）**：假设明日收<font color=\"warning\">涨</font>。",
       "verify_date": "2026-08-13",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.40%"
     },
     {
       "id": "H20260812-20",
       "date": "2026-08-12",
       "hypothesis": "**京投发展（600683，3连板-房地产开）**：假设明日收<font color=\"info\">跌</font>。",
       "verify_date": "2026-08-13",
+      "result": "refuted",
+      "evidence": "上证+0.40%"
+    },
+    {
+      "id": "H20260813-21",
+      "date": "2026-08-13",
+      "hypothesis": "通信设备板块明日收涨或收跌。",
+      "verify_date": "2026-08-14",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260813-22",
+      "date": "2026-08-13",
+      "hypothesis": "中天科技明日收盘是否≥36.00元。",
+      "verify_date": "2026-08-14",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260813-23",
+      "date": "2026-08-13",
+      "hypothesis": "两市成交额明日是否大于今日约1.46万亿。",
+      "verify_date": "2026-08-14",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260813-24",
+      "date": "2026-08-13",
+      "hypothesis": "明日涨停家数是否≥60家。",
+      "verify_date": "2026-08-14",
+      "result": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "H20260813-25",
+      "date": "2026-08-13",
+      "hypothesis": "上证指数明日收涨或收跌。",
+      "verify_date": "2026-08-14",
       "result": "pending",
       "evidence": ""
     }

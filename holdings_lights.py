@@ -1,57 +1,53 @@
-"""持仓状态灯：对照持仓台账的研究卡片触发/失效条件，自动算灯色+触发位距离"""
+"""持仓状态灯：读positions.json配置，算触发位距离+灯色。新增持仓改配置不改代码。"""
 import json
 import os
 
-# 从研究卡片提取的触发位与否决条件（人工维护，随卡片更新）
-# 只放实际持仓标的（用户确认：茅台未持有，不在推送范围）
-# triggers: (标签, 触发价, 灯色, 动作)；veto: 否决持有的硬条件（与价格无关）
-POSITIONS = {
-    "sh600522": {
-        "name": "中天科技",
-        "cost": 63.771,
-        "triggers": [
-            ("减仓区下沿36-38", 36.0, "yellow", "减100股，回收~3600元"),
-            ("铁底27.02", 27.02, "red", "放量跌破则处置减仓"),
-        ],
-        "veto": [
-            "8/28中报归母净利<23.52亿 → 否决持有",
-            "美国/欧盟光纤政策权威坐实 → 否决持有",
-        ],
-    },
-}
+_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "positions.json")
 
 
-def holdings_lights(quotes):
-    """quotes: get_quotes()结果。返回 [(名称, 现价, 涨跌%, 灯列表), ...]"""
+def load_config(path=None):
+    with open(path or _CONFIG_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def holdings_lights(quotes, config=None):
+    """quotes: get_quotes()结果。返回 [{name, code, price, chg_pct, cost, pnl_pct,
+    lights:[展示字符串], triggers:[{label,level,light,action,dist_pct,hit}], veto:[...]}]"""
+    cfg = config or load_config()
+    by_code = {q["code"]: q for q in quotes}
     out = []
-    for q in quotes:
-        code = q["code"]
-        cfg = POSITIONS.get(code)
-        if not cfg:
+    for pos in cfg.get("positions", []):
+        q = by_code.get(pos["code"])
+        if not q:
             continue
         price = q["price"]
-        lights = []
-        for label, level, light, action in cfg["triggers"]:
+        lights, triggers = [], []
+        for t in pos.get("triggers", []):
+            level, light, action = t["level"], t["light"], t["action"]
+            icon = "🟡" if light == "yellow" else "🔴"
             if light == "yellow":  # 压力/目标位：现价在下，报还需涨多少
-                if price >= level:
-                    lights.append(f"🟡 已触及{label}({level}) → {action}")
-                else:
-                    dist = (level / price - 1) * 100
-                    lights.append(f"🟡 距{label}({level})还差{dist:.1f}%，不动作")
-            else:  # 支撑/失效位：现价在上，报还需跌多少
-                if price <= level:
-                    lights.append(f"🔴 已跌破{label}({level}) → {action}")
-                else:
-                    dist = (price / level - 1) * 100
-                    lights.append(f"🔴 距{label}({level})还有{dist:.1f}%缓冲，不动作")
-        pct = (price / cfg["cost"] - 1) * 100
-        lights.append(f"🔴 现价{price}，成本{cfg['cost']}，浮亏{pct:.1f}%")
-        for v in cfg["veto"]:
+                hit = price >= level
+                dist = (level / price - 1) * 100
+                txt = (f"{icon} 已触及{t['label']}({level}) → {action}" if hit
+                       else f"{icon} 距{t['label']}({level})还差{dist:.1f}%，不动作")
+            else:  # 支撑/失效位：现价在上，报还剩多少缓冲
+                hit = price <= level
+                dist = (price / level - 1) * 100
+                txt = (f"{icon} 已跌破{t['label']}({level}) → {action}" if hit
+                       else f"{icon} 距{t['label']}({level})还有{dist:.1f}%缓冲，不动作")
+            lights.append(txt)
+            triggers.append({"label": t["label"], "level": level, "light": light,
+                             "action": action, "dist_pct": dist, "hit": hit})
+        pnl = (price / pos["cost"] - 1) * 100 if pos.get("cost") else None
+        if pnl is not None:
+            lights.append(f"🔴 现价{price}，成本{pos['cost']}，浮亏{pnl:.1f}%"
+                          if pnl < 0 else f"🟢 现价{price}，成本{pos['cost']}，浮盈+{pnl:.1f}%")
+        for v in pos.get("veto", []):
             lights.append(f"🟢 {v}")
-        out.append({
-            "name": cfg["name"], "code": code, "price": price,
-            "chg_pct": q["chg_pct"], "lights": lights,
-        })
+        out.append({"name": pos["name"], "code": pos["code"], "price": price,
+                    "chg_pct": q["chg_pct"], "cost": pos.get("cost"),
+                    "pnl_pct": pnl, "lights": lights, "triggers": triggers,
+                    "veto": pos.get("veto", []), "shares": pos.get("shares")})
     return out
 
 
@@ -69,5 +65,7 @@ def fmt_lights(hl):
 
 if __name__ == "__main__":
     import data_fetcher
-    q = data_fetcher.get_quotes(["sh600522", "sh600519"])
-    print(fmt_lights(holdings_lights(q)))
+    cfg = load_config()
+    codes = [p["code"] for p in cfg["positions"]]
+    q = data_fetcher.get_quotes(codes)
+    print(fmt_lights(holdings_lights(q, cfg)))

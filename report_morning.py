@@ -43,6 +43,14 @@ PROMPT_TEMPLATE = """今天是{date}（{weekday}），请基于以下**实时抓
 {news}
 
 ## 输出要求（严格按此结构）
+0. **决策JSON块（第一段，必须）**：先输出 ```json 代码块，再输出markdown正文。JSON字段：
+   {{"direction": "偏多|震荡|偏空", "probability": 55, "position_advice": "持有|加仓|减仓|空仓|只减不加",
+    "basis": ["依据1(引用数据日期+数值)", "依据2", "依据3"], "invalid_if": "失效条件(必须具体可核验)",
+    "actions": [{{"type": "✅|⚠️|❌", "text": "条件触发式动作"}}],
+    "hypotheses": [{{"text": "今日可对错判断的假设", "category": "index|sector|stock|count",
+                    "target": "sh000001|板块名|股票代码|null", "direction": "up|down",
+                    "threshold": 数值或null, "days": 0}}]}}
+   合规：probability限50-90；direction/probability必配invalid_if；禁"必涨/涨停"；hypotheses 1-3条。
 1. **今日信号**：用一句话复述市场信号仪表盘的天气和操作建议，然后解释依据
 2. **隔夜与盘前要闻**：从新闻中提炼3-5条对今日A股有实质影响的（注明来源和时间）
 3. **昨日市场回顾**：指数表现、量能、板块主线、涨停情绪（数据说话）
@@ -121,6 +129,22 @@ def main():
     print("[3/4] 调用DeepSeek生成晨报...")
     report = llm.chat(llm.SYSTEM_PROMPT, prompt, max_tokens=8000)
 
+    # W2判断层：提取决策JSON块 → 存档 + 假设入库（days=0当日收盘验证）
+    import json as _json
+    dec = llm.extract_json_block(report)
+    body = llm.strip_json_block(report)
+    if dec:
+        os.makedirs("archive", exist_ok=True)
+        with open(f"archive/决策_晨报_{now.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
+            _json.dump(dec, f, ensure_ascii=False, indent=2)
+        hyps = [h for h in (dec.get("hypotheses") or []) if h.get("text")]
+        if hyps:
+            import hypothesis_tracker
+            n_h = hypothesis_tracker.add_hypotheses(hyps)
+            print(f"决策块入库{n_h}条结构化假设 → archive/决策_晨报_{now.strftime('%Y-%m-%d')}.json")
+    else:
+        print("[warn] 未解析到决策JSON块，正文照常推送")
+
     print("[4/4] 推送...")
     weather_emoji = {"晴": "☀️", "多云": "⛅", "雨": "🌧️"}[dash["weather"]]
     title = f"{weather_emoji} A股晨报 {now.strftime('%m-%d')} | {dash['weather']} {dash['score']}分"
@@ -130,10 +154,14 @@ def main():
         print("  [DRY_RUN] 跳过推送")
         print("  结论:", concl)
         print("  清单:\n" + cl_md)
+        if dec:
+            print("  决策块: 方向=%s 概率=%s 仓位=%s 失效=%s" % (
+                dec.get("direction"), dec.get("probability"),
+                dec.get("position_advice"), dec.get("invalid_if")))
     else:
         template, signal_md = market_dashboard.fmt_visual(dash)
         channel, n = notifier.push_decision_card(
-            title, template, concl, signal_md, cl_md, lights, report,
+            title, template, concl, signal_md, cl_md, lights, body,
             note=f"数据 {d['now']} | 模型 {llm.MODEL} | 条件化判断，非投资建议")
         print(f"推送完成（通道={channel}，{n}段）")
 
@@ -141,7 +169,7 @@ def main():
     path = f"archive/晨报_{now.strftime('%Y-%m-%d')}.md"
     with open(path, "w", encoding="utf-8") as f:
         f.write(f"# {title}\n\n> 数据抓取：{d['now']} | 模型：{llm.MODEL}\n\n"
-                f"**{concl}**\n\n{cl_md}\n\n---\n\n{report}")
+                f"**{concl}**\n\n{cl_md}\n\n---\n\n{body}")
     print(f"已存档 {path}")
 
 

@@ -23,8 +23,13 @@ def holdings_lights(quotes, config=None):
         price = q["price"]
         lights, triggers = [], []
         for t in pos.get("triggers", []):
-            level, light, action = t["level"], t["light"], t["action"]
+            level, light, action = t.get("level"), t["light"], t["action"]
             icon = "🟡" if light == "yellow" else "🔴"
+            if level is None:  # 事件型触发（无价格位，如中报核验）：原样显示
+                lights.append(f"{icon} {t['label']} → {action}")
+                triggers.append({"label": t["label"], "level": None, "light": light,
+                                 "action": action, "dist_pct": None, "hit": False})
+                continue
             if light == "yellow":  # 压力/目标位：现价在下，报还需涨多少
                 hit = price >= level
                 dist = (level / price - 1) * 100

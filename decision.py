@@ -38,6 +38,8 @@ def checklist(dash, hl, account=None):
     items = []
     for h in hl:
         for t in h["triggers"]:
+            if t.get("dist_pct") is None:
+                continue  # 事件型触发（无价格位），不进距离清单
             if t["hit"]:
                 items.append(("✅", f"{h['name']}已触及{t['label']} → {t['action']}"))
             elif t["dist_pct"] < 5:
@@ -50,7 +52,15 @@ def checklist(dash, hl, account=None):
     min_amt = account.get("min_trade_amount", 3000)
     if cash < min_amt:
         items.append(("❌", f"不做T：可用资金{cash:.0f}元低于单笔下限{min_amt}元"))
-    items.append(("❌", "不做T：回测证伪（中天倒T 2024-26测试段全亏，胜率25-42%，2026-08-14回测）"))
+    items.append(("❌", "不做T：回测证伪（中天倒T 2024-26测试段全亏；光迅仅'收阳次日'样本内微正、胜率36%待核验，2026-08-15回测）"))
+    # 单票集中度（对抗式审查新增：>80%上限进❌）
+    total = account.get("total") or 0
+    if total > 0:
+        for h in hl:
+            mv = h["price"] * (h.get("shares") or 0)
+            ratio = mv / total * 100
+            if ratio > 80:
+                items.append(("❌", f"{h['name']}单票占比{ratio:.0f}%超80%上限，反弹减仓恢复选择权"))
     if not items:
         items.append(("✅", "无触发，持有观察"))
     return items

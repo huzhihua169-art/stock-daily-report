@@ -35,31 +35,42 @@ def _clean(text):
 
 
 def add_hypotheses(hyps):
-    """hyps: [(hypothesis_text, days_to_verify), ...]"""
+    """hyps: [(text, days), ...] 或 [dict{text, days, category, target, direction, threshold}, ...]
+    category: index|sector|stock|count（W3分类型验证用）；target: 代码/板块名/null；direction: up|down"""
     data = _load()
     today = datetime.now().strftime("%Y-%m-%d")
-    for text, days in hyps:
+    added = 0
+    for h in hyps:
+        if isinstance(h, dict):
+            text, days = h.get("text", ""), h.get("days", 1)
+            extra = {k: h[k] for k in ("category", "target", "direction", "threshold")
+                     if k in h and h[k] is not None}
+        else:
+            text, days = h
+            extra = {}
         text = _clean(text)
         if len(text) < 4:
             continue
         vid = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
-        data["items"].append({
-            "id": f"H{today.replace('-', '')}-{len(data['items'])+1}",
-            "date": today, "hypothesis": text,
-            "verify_date": vid, "result": "pending", "evidence": "",
-        })
+        item = {"id": f"H{today.replace('-', '')}-{len(data['items'])+1}",
+                "date": today, "hypothesis": text,
+                "verify_date": vid, "result": "pending", "evidence": ""}
+        item.update(extra)
+        data["items"].append(item)
+        added += 1
     _save(data)
-    return len(hyps)
+    return added
 
 
 def verify_due():
-    """找出到期未验证的假设，返回 [(id, date, hypothesis), ...]"""
+    """找出到期未验证的假设，返回 [(id, date, hypothesis, category或None), ...]
+    category: index|sector|stock|count（结构化假设由verify_by_type精确验证，跳过粗判）"""
     data = _load()
     today = datetime.now().strftime("%Y-%m-%d")
     due = []
     for it in data["items"]:
         if it["result"] == "pending" and it["verify_date"] <= today:
-            due.append((it["id"], it["date"], it["hypothesis"]))
+            due.append((it["id"], it["date"], it["hypothesis"], it.get("category")))
     return due
 
 

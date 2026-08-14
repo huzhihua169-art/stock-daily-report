@@ -1,0 +1,26 @@
+{
+  "account": {
+    "total": 8146.30,
+    "cash": 63.30,
+    "position_pct": 99.2,
+    "max_position_pct": 70,
+    "min_trade_amount": 3000,
+    "updated": "2026-08-11"
+  },
+  "positions": [
+    {
+      "code": "sh600522",
+      "name": "中天科技",
+      "cost": 63.771,
+      "shares": 200,
+      "triggers": [
+        {"label": "减仓区下沿36-38", "level": 36.0, "light": "yellow", "action": "减100股，回收~3600元"},
+        {"label": "铁底27.02", "level": 27.02, "light": "red", "action": "放量跌破则处置减仓"}
+      ],
+      "veto": [
+        "8/28中报归母净利<23.52亿 → 否决持有",
+        "美国/欧盟光纤政策权威坐实 → 否决持有"
+      ]
+    }
+  ]
+}

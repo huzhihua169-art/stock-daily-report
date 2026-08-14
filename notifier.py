@@ -175,6 +175,29 @@ def push_visual(title, template, signal_md, lights_md, body_md, note=""):
     return push_report(title, combined)
 
 
+def push_decision_card(title, template, conclusion_md, signal_md, checklist_md,
+                       lights_md, body_md, note=""):
+    """5区决策仪表盘卡片（借鉴daily_stock_analysis决策看板）：
+    ①一句话结论置顶 ②信号仪表盘 ③✅⚠️❌操作清单 ④持仓灯 ⑤LLM正文。
+    飞书用interactive卡片；其他通道降级为纯文本拼接。返回 (通道, 分段数)。"""
+    feishu = os.environ.get("FEISHU_WEBHOOK_URL", "")
+    concl = f"**{conclusion_md}**"
+    if feishu:
+        MAX_FS = 16000
+        head_zones = [concl, signal_md, checklist_md, lights_md]
+        if len(body_md.encode("utf-8")) <= MAX_FS:
+            feishu_card(feishu, title, template, head_zones + [body_md], note)
+            return "feishu", 1
+        # 超长：头4区一卡，正文分段跟发
+        feishu_card(feishu, title, template, head_zones, note)
+        chunks = _split_utf8(body_md, MAX_FS)
+        for i, c in enumerate(chunks):
+            _feishu_send(feishu, c, f"{title}（续{i+1}/{len(chunks)}）")
+        return "feishu", 1 + len(chunks)
+    combined = "\n\n".join([conclusion_md, signal_md, checklist_md, lights_md, body_md])
+    return push_report(title, combined)
+
+
 def push_text(text):
     """纯文本推送（测试/告警），失败自动降级下一通道"""
     token = os.environ.get("PUSHPLUS_TOKEN", "")

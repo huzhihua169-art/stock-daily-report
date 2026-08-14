@@ -204,6 +204,12 @@ def main():
                     hypothesis_tracker.set_result(hid, "refuted", f"上证{sh_chg:+.2f}%")
         print(f"已粗判{len([x for x in due if not x[3]])}条到期假设（结构化{len([x for x in due if x[3]])}条待分类型验证）")
 
+    # W3分类型精确验证：index/sector/stock/count各自取数，evidence写真实数据
+    judged = hypothesis_tracker.verify_by_type(d)
+    if judged:
+        for hid, res, ev in judged:
+            print(f"  分类型验证 {hid}: {res} — {ev}")
+
 
 if __name__ == "__main__":
     main()

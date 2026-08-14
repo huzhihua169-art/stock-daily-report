@@ -1,10 +1,19 @@
-name: 中天科技中报核验（8/28一次性）
+name: 持仓中报核验（光迅8/20 + 中天8/28）
 
 on:
   schedule:
-    # 北京时间8/28 19:30 = UTC 11:30（中报预约披露日当天盘后核验）
+    # 光迅科技：北京8/20 19:30 = UTC 11:30（中报预披露日当天盘后核验）
+    - cron: "30 11 20 8 *"
+    # 中天科技：北京8/28 19:30 = UTC 11:30
     - cron: "30 11 28 8 *"
   workflow_dispatch:
+    inputs:
+      target:
+        description: "核验标的"
+        required: true
+        default: "zt"
+        type: choice
+        options: [zt, gx]
 
 permissions:
   contents: write
@@ -21,13 +30,34 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: 判定核验标的
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "t=${{ inputs.target }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "30 11 20 8 *" ]; then
+            echo "t=gx" >> "$GITHUB_OUTPUT"
+          else
+            echo "t=zt" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 核验并推送中报结论
         env:
           WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
           PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        run: python verify_h1.py
+        run: |
+          if [ "${{ steps.target.outputs.t }}" = "gx" ]; then
+            export VERIFY_CODE=002281 VERIFY_NAME=光迅科技 \
+                   FORECAST_LOW=5.586 VERIFY_OK=5.9 FORECAST_HIGH=6.15 \
+                   LAST_YEAR_H1=3.724 DISCLOSE_DATE=2026-08-20
+          else
+            export VERIFY_CODE=600522 VERIFY_NAME=中天科技 \
+                   FORECAST_LOW=23.52 VERIFY_OK=24.0 FORECAST_HIGH=25.08 \
+                   LAST_YEAR_H1=15.6772998986 DISCLOSE_DATE=2026-08-28
+          fi
+          python verify_h1.py
 
       - name: 存档核验结果回仓库
         run: |

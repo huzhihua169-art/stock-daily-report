@@ -50,6 +50,7 @@ def checklist(dash, hl, account=None):
     min_amt = account.get("min_trade_amount", 3000)
     if cash < min_amt:
         items.append(("❌", f"不做T：可用资金{cash:.0f}元低于单笔下限{min_amt}元"))
+    items.append(("❌", "不做T：回测证伪（中天倒T 2024-26测试段全亏，胜率25-42%，2026-08-14回测）"))
     if not items:
         items.append(("✅", "无触发，持有观察"))
     return items

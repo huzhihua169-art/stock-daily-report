@@ -113,14 +113,22 @@ def main():
     import json as _json
     dec = llm.extract_json_block(report)
     body = llm.strip_json_block(report)
-    if dec and dec.get("hypotheses"):
+    if dec:
         os.makedirs("archive", exist_ok=True)
         with open(f"archive/决策_{now.strftime('%Y-%m-%d')}.json", "w", encoding="utf-8") as f:
             _json.dump(dec, f, ensure_ascii=False, indent=2)
-        hyps = [h for h in dec["hypotheses"] if h.get("text")]
+        hyps = [h for h in dec.get("hypotheses") or [] if h.get("text")]
         if hyps:
             n_h = hypothesis_tracker.add_hypotheses(hyps)
             print(f"决策块入库{n_h}条结构化假设 → archive/决策_{now.strftime('%Y-%m-%d')}.json")
+        # 决策摘要渲染进正文（方向/概率/失效条件/动作）
+        act_lines = "\n".join(f"- {a.get('type', '')} {a.get('text', '')}"
+                              for a in dec.get("actions") or [])
+        dec_summary = (f"**决策摘要**：方向={dec.get('direction', '未知')}"
+                       f"（概率{dec.get('probability', '-')}%）| "
+                       f"仓位建议={dec.get('position_advice', '未知')}\n"
+                       f"失效条件：{dec.get('invalid_if', '未知')}\n{act_lines}")
+        body = dec_summary + "\n\n---\n\n" + body
     else:
         print("[warn] 未解析到决策JSON块，走正则兜底")
 

@@ -1,0 +1,19 @@
+{
+  "_comment": "LLM决策块输出schema（W2判断层）。LLM先输出```json块再输出markdown正文；程序解析JSON块存档+入库假设。合规红线：direction/probability必配invalid_if；actions只写条件触发式；禁'必涨/涨停'措辞。",
+  "required": ["direction", "probability", "position_advice", "basis", "invalid_if", "actions", "hypotheses"],
+  "fields": {
+    "direction": "string: 偏多|震荡|偏空（市场方向判断）",
+    "probability": "int 50-90: 该方向的置信度（禁止>90%，禁止100%）",
+    "position_advice": "string: 持有|加仓|减仓|空仓|只减不加（条件化建议，非指令）",
+    "basis": "string[] 1-3条: 每条必须引用具体数据（数据日期+数值+来源）",
+    "invalid_if": "string: 本判断失效条件（必须具体可核验，如'上证跌破20日线且涨停<30只'）",
+    "actions": "object[]: [{type: '✅'|'⚠️'|'❌', text: '条件触发式动作，如 若放量破27.02则减仓'}] 1-3条",
+    "hypotheses": "object[] 1-3条明日可验证假设: [{text, category: 'index'|'sector'|'stock'|'count', target: 'sh000001'|'板块名'|'股票代码'|null, direction: 'up'|'down', threshold: 数值或null, days: 1}]"
+  },
+  "rules": [
+    "direction/probability 必须配 invalid_if，三者缺一即判无效",
+    "禁止'明日必涨/涨停/一定'等确定性措辞",
+    "数据缺失时 basis 写'未知/待核验'，不得编造",
+    "不得给无条件买卖指令，不得自动交易"
+  ]
+}

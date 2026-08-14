@@ -165,8 +165,8 @@
       "date": "2026-08-13",
       "hypothesis": "通信设备板块明日收涨或收跌。",
       "verify_date": "2026-08-14",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.01%"
     },
     {
       "id": "H20260813-22",
@@ -189,16 +189,16 @@
       "date": "2026-08-13",
       "hypothesis": "明日涨停家数是否≥60家。",
       "verify_date": "2026-08-14",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.01%"
     },
     {
       "id": "H20260813-25",
       "date": "2026-08-13",
       "hypothesis": "上证指数明日收涨或收跌。",
       "verify_date": "2026-08-14",
-      "result": "pending",
-      "evidence": ""
+      "result": "confirmed",
+      "evidence": "上证+0.01%"
     }
   ]
 }

@@ -5,6 +5,7 @@ import sys
 from datetime import datetime
 
 import data_fetcher
+import decision
 import holdings_lights
 import llm
 import market_dashboard
@@ -98,7 +99,8 @@ def main():
 
     # 信号仪表盘 + 持仓灯
     dash = market_dashboard.market_dashboard(d["stats"], d["ztdt"]["zt_total"], d["ztdt"]["dt_total"])
-    lights = holdings_lights.fmt_lights(holdings_lights.holdings_lights(d["watchlist"]))
+    hl = holdings_lights.holdings_lights(d["watchlist"])
+    lights = holdings_lights.fmt_lights(hl)
 
     now = datetime.now()
     weekdays = "一二三四五六日"
@@ -120,20 +122,26 @@ def main():
     report = llm.chat(llm.SYSTEM_PROMPT, prompt, max_tokens=8000)
 
     print("[4/4] 推送...")
-    title = f"A股晨报 {now.strftime('%m-%d')} 周{weekdays[now.weekday()]}"
+    weather_emoji = {"晴": "☀️", "多云": "⛅", "雨": "🌧️"}[dash["weather"]]
+    title = f"{weather_emoji} A股晨报 {now.strftime('%m-%d')} | {dash['weather']} {dash['score']}分"
+    concl = decision.conclusion(dash, hl, mode="morning")
+    cl_md = decision.fmt_checklist(decision.checklist(dash, hl))
     if os.environ.get("DRY_RUN") == "1":
         print("  [DRY_RUN] 跳过推送")
+        print("  结论:", concl)
+        print("  清单:\n" + cl_md)
     else:
         template, signal_md = market_dashboard.fmt_visual(dash)
-        channel, n = notifier.push_visual(
-            title, template, signal_md, lights, report,
-            note=f"数据 {d['now']} | 模型 {llm.MODEL} | 仅供研究参考")
+        channel, n = notifier.push_decision_card(
+            title, template, concl, signal_md, cl_md, lights, report,
+            note=f"数据 {d['now']} | 模型 {llm.MODEL} | 条件化判断，非投资建议")
         print(f"推送完成（通道={channel}，{n}段）")
 
     os.makedirs("archive", exist_ok=True)
     path = f"archive/晨报_{now.strftime('%Y-%m-%d')}.md"
     with open(path, "w", encoding="utf-8") as f:
-        f.write(f"# {title}\n\n> 数据抓取：{d['now']} | 模型：{llm.MODEL}\n\n{report}")
+        f.write(f"# {title}\n\n> 数据抓取：{d['now']} | 模型：{llm.MODEL}\n\n"
+                f"**{concl}**\n\n{cl_md}\n\n---\n\n{report}")
     print(f"已存档 {path}")
 
 

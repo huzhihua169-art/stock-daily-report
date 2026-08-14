@@ -142,6 +142,13 @@ def main():
             import hypothesis_tracker
             n_h = hypothesis_tracker.add_hypotheses(hyps)
             print(f"决策块入库{n_h}条结构化假设 → archive/决策_晨报_{now.strftime('%Y-%m-%d')}.json")
+        act_lines = "\n".join(f"- {a.get('type', '')} {a.get('text', '')}"
+                              for a in dec.get("actions") or [])
+        dec_summary = (f"**决策摘要**：方向={dec.get('direction', '未知')}"
+                       f"（概率{dec.get('probability', '-')}%）| "
+                       f"仓位建议={dec.get('position_advice', '未知')}\n"
+                       f"失效条件：{dec.get('invalid_if', '未知')}\n{act_lines}")
+        body = dec_summary + "\n\n---\n\n" + body
     else:
         print("[warn] 未解析到决策JSON块，正文照常推送")
 

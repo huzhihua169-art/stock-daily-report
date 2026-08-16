@@ -6,6 +6,8 @@ on:
     - cron: "30 0 * * 1-5"
     # 复盘：北京时间15:35 = UTC 07:35（收盘后5分钟，等数据落地）
     - cron: "35 7 * * 1-5"
+    # 周度总结：周六北京时间10:00 = UTC 02:00
+    - cron: "0 2 * * 6"
   workflow_dispatch:
     inputs:
       report_type:
@@ -13,7 +15,7 @@ on:
         required: true
         default: "morning"
         type: choice
-        options: [morning, close]
+        options: [morning, close, weekly]
       force:
         description: "强制运行（跳过交易日检查）"
         required: false
@@ -42,6 +44,9 @@ jobs:
           elif [ "${{ github.event.schedule }}" = "30 0 * * 1-5" ]; then
             # 晨报cron（北京时间08:30）；用schedule字符串精确判断，不依赖运行时刻
             echo "type=morning" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "0 2 * * 6" ]; then
+            # 周度总结cron（周六北京时间10:00）
+            echo "type=weekly" >> "$GITHUB_OUTPUT"
           else
             echo "type=close" >> "$GITHUB_OUTPUT"
           fi
@@ -57,6 +62,8 @@ jobs:
         run: |
           if [ "${{ steps.rt.outputs.type }}" = "morning" ]; then
             python report_morning.py
+          elif [ "${{ steps.rt.outputs.type }}" = "weekly" ]; then
+            python report_weekly.py
           else
             python report_close.py
           fi

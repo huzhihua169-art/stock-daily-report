@@ -12,25 +12,32 @@ def load_config(path=None):
 
 def holdings_lights(quotes, config=None):
     """quotes: get_quotes()结果。返回 [{name, code, price, chg_pct, cost, pnl_pct,
-    lights:[展示字符串], triggers:[{label,level,light,action,dist_pct,hit}], veto:[...]}]"""
+    lights:[展示字符串], triggers:[...], veto:[...], is_watch:bool}]"""
     cfg = config or load_config()
     by_code = {q["code"]: q for q in quotes}
     out = []
-    for pos in cfg.get("positions", []):
+
+    def build(pos, is_watch=False):
         q = by_code.get(pos["code"])
         if not q:
-            continue
+            return None
         price = q["price"]
         lights, triggers = [], []
         for t in pos.get("triggers", []):
             level, light, action = t.get("level"), t["light"], t["action"]
             icon = "🟡" if light == "yellow" else "🔴"
+            direction = t.get("direction", "up")  # up=压力位(现价涨到level触发)；down=回调位(现价跌到level触发)
             if level is None:  # 事件型触发（无价格位，如中报核验）：原样显示
                 lights.append(f"{icon} {t['label']} → {action}")
                 triggers.append({"label": t["label"], "level": None, "light": light,
                                  "action": action, "dist_pct": None, "hit": False})
                 continue
-            if light == "yellow":  # 压力/目标位：现价在下，报还需涨多少
+            if direction == "down":  # 回调买入位：现价在上，报还需跌多少才到
+                hit = price <= level
+                dist = (price / level - 1) * 100
+                txt = (f"{icon} 已回调至{t['label']}({level}) → {action}" if hit
+                       else f"{icon} 距{t['label']}({level})回调位还有{dist:.1f}%空间，不动作")
+            elif light == "yellow":  # 压力/目标位：现价在下，报还需涨多少
                 hit = price >= level
                 dist = (level / price - 1) * 100
                 txt = (f"{icon} 已触及{t['label']}({level}) → {action}" if hit
@@ -49,22 +56,42 @@ def holdings_lights(quotes, config=None):
                           if pnl < 0 else f"🟢 现价{price}，成本{pos['cost']}，浮盈+{pnl:.1f}%")
         for v in pos.get("veto", []):
             lights.append(f"🟢 {v}")
-        out.append({"name": pos["name"], "code": pos["code"], "price": price,
-                    "chg_pct": q["chg_pct"], "cost": pos.get("cost"),
-                    "pnl_pct": pnl, "lights": lights, "triggers": triggers,
-                    "veto": pos.get("veto", []), "shares": pos.get("shares")})
+        return {"name": pos["name"], "code": pos["code"], "price": price,
+                "chg_pct": q["chg_pct"], "cost": pos.get("cost"),
+                "pnl_pct": pnl, "lights": lights, "triggers": triggers,
+                "veto": pos.get("veto", []), "shares": pos.get("shares"),
+                "is_watch": is_watch, "note": pos.get("note", "")}
+
+    for pos in cfg.get("positions", []):
+        h = build(pos, is_watch=False)
+        if h:
+            out.append(h)
+    for pos in cfg.get("watchlist", []):  # 观察池（非持仓，但有研究卡片/触发位）
+        h = build(pos, is_watch=True)
+        if h:
+            out.append(h)
     return out
 
 
 def fmt_lights(hl):
-    """格式化持仓状态灯为markdown"""
+    """格式化持仓状态灯为markdown（持仓+观察池分块）"""
     if not hl:
-        return "持仓状态灯：观察池暂无标的（待建立研究卡片）"
+        return "状态灯：暂无标的"
     lines = []
-    for h in hl:
-        lines.append(f"**{h['name']}** ({h['price']}，{h['chg_pct']:+}%)")
-        for l in h["lights"]:
-            lines.append(f"  - {l}")
+    holds = [h for h in hl if not h["is_watch"]]
+    watch = [h for h in hl if h["is_watch"]]
+    if holds:
+        lines.append("**持仓**")
+        for h in holds:
+            lines.append(f"🔸 {h['name']} ({h['price']}，{h['chg_pct']:+}%)")
+            for l in h["lights"]:
+                lines.append(f"  - {l}")
+    if watch:
+        lines.append("**观察池**（非持仓，研究跟踪）")
+        for h in watch:
+            lines.append(f"🔸 {h['name']} ({h['price']}，{h['chg_pct']:+}%)")
+            for l in h["lights"]:
+                lines.append(f"  - {l}")
     return "\n".join(lines)
 
 

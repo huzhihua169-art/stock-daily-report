@@ -19,6 +19,8 @@ def conclusion(dash, hl, mode="close"):
     nearest = None
     for h in hl:
         for t in h["triggers"]:
+            if t.get("dist_pct") is None:
+                continue  # 事件型触发（无价格位），不比距离
             if nearest is None or t["dist_pct"] < nearest[1]:
                 nearest = (f"{h['name']}{t['label']}", t["dist_pct"], t["hit"], t["action"])
     if nearest and nearest[2]:
@@ -37,6 +39,8 @@ def checklist(dash, hl, account=None):
     account = account or load_config().get("account", {})
     items = []
     for h in hl:
+        if h.get("is_watch"):  # 观察池（非持仓）不进操作清单，只在状态灯展示
+            continue
         for t in h["triggers"]:
             if t.get("dist_pct") is None:
                 continue  # 事件型触发（无价格位），不进距离清单
@@ -57,6 +61,8 @@ def checklist(dash, hl, account=None):
     total = account.get("total") or 0
     if total > 0:
         for h in hl:
+            if h.get("is_watch"):
+                continue
             mv = h["price"] * (h.get("shares") or 0)
             ratio = mv / total * 100
             if ratio > 80:

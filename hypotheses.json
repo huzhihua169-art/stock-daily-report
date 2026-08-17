@@ -270,6 +270,41 @@
       "category": "stock",
       "target": "688380",
       "direction": "up"
+    },
+    {
+      "id": "H20260817-32",
+      "date": "2026-08-17",
+      "hypothesis": "上证指数明日(8/18)收盘价高于今日收盘3982.65",
+      "verify_date": "2026-08-18",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "up",
+      "threshold": 3982.65
+    },
+    {
+      "id": "H20260817-33",
+      "date": "2026-08-17",
+      "hypothesis": "半导体板块明日(8/18)收盘涨幅为正",
+      "verify_date": "2026-08-18",
+      "result": "pending",
+      "evidence": "",
+      "category": "sector",
+      "target": "半导体",
+      "direction": "up"
+    },
+    {
+      "id": "H20260817-34",
+      "date": "2026-08-17",
+      "hypothesis": "中天科技明日(8/18)收盘价低于36.00元",
+      "verify_date": "2026-08-18",
+      "result": "pending",
+      "evidence": "",
+      "category": "stock",
+      "target": "600522",
+      "direction": "down",
+      "threshold": 36.0
     }
   ]
 }

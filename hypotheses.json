@@ -305,6 +305,42 @@
       "target": "600522",
       "direction": "down",
       "threshold": 36.0
+    },
+    {
+      "id": "H20260818-35",
+      "date": "2026-08-18",
+      "hypothesis": "今日上证指数收盘涨跌幅不超过±0.5%（窄幅震荡）",
+      "verify_date": "2026-08-18",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "up",
+      "threshold": 0.5
+    },
+    {
+      "id": "H20260818-36",
+      "date": "2026-08-18",
+      "hypothesis": "种植业板块（昨日+6.59%）今日出现回调，收盘涨幅收窄至+2%以内",
+      "verify_date": "2026-08-18",
+      "result": "pending",
+      "evidence": "",
+      "category": "sector",
+      "target": "种植业",
+      "direction": "down",
+      "threshold": 2.0
+    },
+    {
+      "id": "H20260818-37",
+      "date": "2026-08-18",
+      "hypothesis": "中天科技(600522)今日收盘价低于36.0（减仓区下沿）",
+      "verify_date": "2026-08-18",
+      "result": "pending",
+      "evidence": "",
+      "category": "stock",
+      "target": "600522",
+      "direction": "down",
+      "threshold": 36.0
     }
   ]
 }

@@ -376,6 +376,41 @@
       "category": "stock",
       "target": "600613",
       "direction": "up"
+    },
+    {
+      "id": "H20260819-41",
+      "date": "2026-08-19",
+      "hypothesis": "今日上证收盘价低于3900(较昨收3942.42再跌1%以上)",
+      "verify_date": "2026-08-19",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "down",
+      "threshold": 3900
+    },
+    {
+      "id": "H20260819-42",
+      "date": "2026-08-19",
+      "hypothesis": "今日涨停家数低于20家(情绪进一步降温)",
+      "verify_date": "2026-08-19",
+      "result": "pending",
+      "evidence": "",
+      "category": "count",
+      "direction": "down",
+      "threshold": 20
+    },
+    {
+      "id": "H20260819-43",
+      "date": "2026-08-19",
+      "hypothesis": "中天科技(600522)今日收盘价低于33.0(延续昨日-5.04%跌势)",
+      "verify_date": "2026-08-19",
+      "result": "pending",
+      "evidence": "",
+      "category": "stock",
+      "target": "sh600522",
+      "direction": "down",
+      "threshold": 33.0
     }
   ]
 }

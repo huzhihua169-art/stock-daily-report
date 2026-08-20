@@ -446,6 +446,40 @@
       "category": "stock",
       "target": "600127",
       "direction": "up"
+    },
+    {
+      "id": "H20260820-47",
+      "date": "2026-08-20",
+      "hypothesis": "今日上证指数收盘价高于3923（昨日收盘价）",
+      "verify_date": "2026-08-20",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "up",
+      "threshold": 3923
+    },
+    {
+      "id": "H20260820-48",
+      "date": "2026-08-20",
+      "hypothesis": "今日生物制品板块（申万）涨幅继续跑赢上证指数",
+      "verify_date": "2026-08-20",
+      "result": "pending",
+      "evidence": "",
+      "category": "sector",
+      "target": "生物制品",
+      "direction": "up"
+    },
+    {
+      "id": "H20260820-49",
+      "date": "2026-08-20",
+      "hypothesis": "今日两市涨停家数不低于40只",
+      "verify_date": "2026-08-20",
+      "result": "pending",
+      "evidence": "",
+      "category": "count",
+      "direction": "up",
+      "threshold": 40
     }
   ]
 }

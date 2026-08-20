@@ -2,12 +2,12 @@ name: A股晨报与收盘复盘
 
 on:
   schedule:
-    # 晨报：北京时间08:30 = UTC 00:30（GitHub cron可能有数分钟延迟）
-    - cron: "30 0 * * 1-5"
-    # 复盘：北京时间15:35 = UTC 07:35（收盘后5分钟，等数据落地）
-    - cron: "35 7 * * 1-5"
-    # 周度总结：周六北京时间10:00 = UTC 02:00
-    - cron: "0 2 * * 6"
+    # 晨报：北京时间08:00 = UTC 00:00（提前30min留buffer抵消GitHub Actions cron延迟）
+    - cron: "0 0 * * 1-5"
+    # 复盘：北京时间15:25 = UTC 07:25（提前10min）
+    - cron: "25 7 * * 1-5"
+    # 周度总结：周六北京时间09:30 = UTC 01:30
+    - cron: "30 1 * * 6"
   workflow_dispatch:
     inputs:
       report_type:
@@ -41,11 +41,11 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "type=${{ inputs.report_type }}" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event.schedule }}" = "30 0 * * 1-5" ]; then
-            # 晨报cron（北京时间08:30）；用schedule字符串精确判断，不依赖运行时刻
+          elif [ "${{ github.event.schedule }}" = "0 0 * * 1-5" ]; then
+            # 晨报cron（北京时间08:00）；用schedule字符串精确判断，不依赖运行时刻
             echo "type=morning" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event.schedule }}" = "0 2 * * 6" ]; then
-            # 周度总结cron（周六北京时间10:00）
+          elif [ "${{ github.event.schedule }}" = "30 1 * * 6" ]; then
+            # 周度总结cron（周六北京时间09:30）
             echo "type=weekly" >> "$GITHUB_OUTPUT"
           else
             echo "type=close" >> "$GITHUB_OUTPUT"
@@ -75,3 +75,26 @@ jobs:
           git add archive/ hypotheses.json || true
           git commit -m "report $(date -u +%Y-%m-%d)" || echo "无新提交"
           git push origin main || echo "push失败（不影响推送）"
+
+      # 防schedule事件积压：超过30分钟跑的过期cron直接cancel
+      - name: 防延迟积压
+        if: github.event_name == 'schedule'
+        run: |
+          HOUR=$(date -u +%H)
+          MIN=$(date -u +%M)
+          case "${{ github.event.schedule }}" in
+            "0 0 * * 1-5")
+              # 晨报cron：UTC 00:00跑，如果延迟超过2小时（HOUR>02），说明严重积压，cancel
+              if [ "$HOUR" -ge "02" ]; then
+                echo "::warning::晨报cron严重延迟(>$HOUR:$MIN UTC)，跳过本次执行避免与今日复盘冲突"
+                exit 0
+              fi
+              ;;
+            "25 7 * * 1-5")
+              # 复盘cron：UTC 07:25跑，超过2小时(H>10)说明积压
+              if [ "$HOUR" -ge "10" ]; then
+                echo "::warning::复盘cron严重延迟(>$HOUR:$MIN UTC)，跳过本次执行"
+                exit 0
+              fi
+              ;;
+          esac

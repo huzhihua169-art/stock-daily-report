@@ -514,6 +514,41 @@
       "category": "count",
       "direction": "up",
       "threshold": 50
+    },
+    {
+      "id": "H20260820-53",
+      "date": "2026-08-20",
+      "hypothesis": "上证指数明日（8/21）收盘是否站稳3900点上方",
+      "verify_date": "2026-08-21",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "up",
+      "threshold": 3900
+    },
+    {
+      "id": "H20260820-54",
+      "date": "2026-08-20",
+      "hypothesis": "生物制品板块明日（8/21）是否延续上涨（收盘涨幅>0%）",
+      "verify_date": "2026-08-21",
+      "result": "pending",
+      "evidence": "",
+      "category": "sector",
+      "target": "生物制品",
+      "direction": "up",
+      "threshold": 0
+    },
+    {
+      "id": "H20260820-55",
+      "date": "2026-08-20",
+      "hypothesis": "金健米业明日（8/21）是否继续涨停（5连板）",
+      "verify_date": "2026-08-21",
+      "result": "pending",
+      "evidence": "",
+      "category": "stock",
+      "target": "600127",
+      "direction": "up"
     }
   ]
 }

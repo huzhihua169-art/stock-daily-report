@@ -1,27 +1,42 @@
 {
   "account": {
-    "total": 8873.30,
-    "cash": 1763.30,
-    "position_pct": 80.1,
+    "total": 8570.62,
+    "cash": 41.02,
+    "position_pct": 99.5,
     "max_position_pct": 70,
     "min_trade_amount": 3000,
-    "updated": "2026-08-16",
-    "note": "用户截图（p2）确认：总资产8,873.30，可用1,763.30，仓位80.1%。已超过70%仓位上限纪律"
+    "updated": "2026-08-20",
+    "note": "用户截图（p3）确认：总资产8,570.62，可用41.02，仓位99.5%。8/18按纪律在36.8减持中天100股，剩余100股成本因减半仓升至90.836；通信ETF 7900份@0.683较8/16加仓（待用户核账）。超70%上限纪律，无补仓与做T空间"
   },
   "positions": [
     {
       "code": "sh600522",
       "name": "中天科技",
-      "cost": 63.771,
-      "shares": 200,
+      "cost": 90.836,
+      "shares": 100,
       "triggers": [
-        {"label": "减仓区下沿36-38", "level": 36.0, "light": "yellow", "action": "减100股，回收~3600元"},
-        {"label": "铁底27.02", "level": 27.02, "light": "red", "action": "放量跌破则处置减仓"}
+        {"label": "反弹至36-38减仓区（8/18已执行）", "level": 36.0, "light": "yellow", "action": "8/18@36.8已卖100股，剩余不再执行"},
+        {"label": "铁底27.02", "level": 27.02, "light": "red", "action": "放量跌破则处置剩余100股"},
+        {"label": "二次减仓位34-35（反弹遇阻）", "level": 34.0, "light": "yellow", "direction": "down", "action": "如缩量反弹遇阻可考虑再减50股"}
       ],
       "veto": [
         "8/28中报归母净利<23.52亿 → 否决持有",
         "美国/欧盟光纤政策权威坐实 → 否决持有"
       ]
+    },
+    {
+      "code": "ETF_COMM_PENDING",
+      "name": "通信ETF(待确认代码)",
+      "cost": 0.683,
+      "shares": 7900,
+      "triggers": [
+        {"label": "0.65以下加仓位", "level": 0.65, "light": "yellow", "direction": "down", "action": "但无资金（可用仅41元），仅观察"},
+        {"label": "0.75以上分批止盈", "level": 0.75, "light": "yellow", "action": "可分批减仓ETF改善持仓结构"}
+      ],
+      "veto": [
+        "通信行业景气度下台阶+ETF净值破0.6 → 否决持有"
+      ],
+      "code_pending_reason": "截图显示'通信ETF'现价0.664，但常见通信ETF(515050等)现价约1.0，代码未对得上。请用户在下一次截图时点入ETF详情页确认6位代码"
     }
   ],
   "_watchlist_for_friend": {

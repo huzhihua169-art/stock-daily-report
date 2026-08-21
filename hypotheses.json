@@ -549,6 +549,42 @@
       "category": "stock",
       "target": "600127",
       "direction": "up"
+    },
+    {
+      "id": "H20260821-56",
+      "date": "2026-08-21",
+      "hypothesis": "今日上证指数收盘高于3903.72（昨日收盘价）",
+      "verify_date": "2026-08-21",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "up",
+      "threshold": 3903.72
+    },
+    {
+      "id": "H20260821-57",
+      "date": "2026-08-21",
+      "hypothesis": "今日生物制品板块涨幅回落至3%以内（昨日+7.85%），板块轮动加速",
+      "verify_date": "2026-08-21",
+      "result": "pending",
+      "evidence": "",
+      "category": "sector",
+      "target": "生物制品",
+      "direction": "down",
+      "threshold": 3.0
+    },
+    {
+      "id": "H20260821-58",
+      "date": "2026-08-21",
+      "hypothesis": "中天科技今日收盘价高于33.5元（昨日32.84）",
+      "verify_date": "2026-08-21",
+      "result": "pending",
+      "evidence": "",
+      "category": "stock",
+      "target": "600522",
+      "direction": "up",
+      "threshold": 33.5
     }
   ]
 }

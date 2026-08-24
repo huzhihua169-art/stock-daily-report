@@ -619,6 +619,41 @@
       "category": "count",
       "direction": "up",
       "threshold": 50
+    },
+    {
+      "id": "H20260824-62",
+      "date": "2026-08-24",
+      "hypothesis": "今日上证指数收盘价高于3905（昨日收盘价）",
+      "verify_date": "2026-08-24",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "up",
+      "threshold": 3905.2
+    },
+    {
+      "id": "H20260824-63",
+      "date": "2026-08-24",
+      "hypothesis": "今日通信设备板块涨幅超过2%（昨日+2.98%延续性验证）",
+      "verify_date": "2026-08-24",
+      "result": "pending",
+      "evidence": "",
+      "category": "sector",
+      "target": "通信设备",
+      "direction": "up",
+      "threshold": 2.0
+    },
+    {
+      "id": "H20260824-64",
+      "date": "2026-08-24",
+      "hypothesis": "今日涨停家数低于40只（情绪降温验证）",
+      "verify_date": "2026-08-24",
+      "result": "pending",
+      "evidence": "",
+      "category": "count",
+      "direction": "down",
+      "threshold": 40
     }
   ]
 }

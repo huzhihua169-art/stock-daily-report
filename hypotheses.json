@@ -689,6 +689,41 @@
       "category": "count",
       "direction": "down",
       "threshold": 40
+    },
+    {
+      "id": "H20260825-68",
+      "date": "2026-08-25",
+      "hypothesis": "今日上证指数收盘价低于3882（昨日收盘价）",
+      "verify_date": "2026-08-25",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "down",
+      "threshold": 3882.01
+    },
+    {
+      "id": "H20260825-69",
+      "date": "2026-08-25",
+      "hypothesis": "今日涨停家数低于46家（昨日水平）",
+      "verify_date": "2026-08-25",
+      "result": "pending",
+      "evidence": "",
+      "category": "count",
+      "direction": "down",
+      "threshold": 46
+    },
+    {
+      "id": "H20260825-70",
+      "date": "2026-08-25",
+      "hypothesis": "中天科技今日收盘价低于32.53（昨日收盘价）",
+      "verify_date": "2026-08-25",
+      "result": "pending",
+      "evidence": "",
+      "category": "stock",
+      "target": "sh600522",
+      "direction": "down",
+      "threshold": 32.53
     }
   ]
 }

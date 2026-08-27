@@ -830,6 +830,42 @@
       "target": "sh600522",
       "direction": "up",
       "threshold": 27.02
+    },
+    {
+      "id": "H20260827-80",
+      "date": "2026-08-27",
+      "hypothesis": "今日上证指数收盘站稳3945上方（昨日高点3944.51），则短期上行趋势延续",
+      "verify_date": "2026-08-27",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "up",
+      "threshold": 3945
+    },
+    {
+      "id": "H20260827-81",
+      "date": "2026-08-27",
+      "hypothesis": "今日半导体板块（昨日+3.39%）继续跑赢大盘，则科技主线未切换",
+      "verify_date": "2026-08-27",
+      "result": "pending",
+      "evidence": "",
+      "category": "sector",
+      "target": "半导体",
+      "direction": "up",
+      "threshold": 2.0
+    },
+    {
+      "id": "H20260827-82",
+      "date": "2026-08-27",
+      "hypothesis": "中天科技今日收盘价低于34.0元（二次减仓位），则反弹遇阻信号确认",
+      "verify_date": "2026-08-27",
+      "result": "pending",
+      "evidence": "",
+      "category": "stock",
+      "target": "sh600522",
+      "direction": "down",
+      "threshold": 34.0
     }
   ]
 }

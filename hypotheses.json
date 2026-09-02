@@ -1113,6 +1113,41 @@
       "category": "stock",
       "target": "002084",
       "direction": "down"
+    },
+    {
+      "id": "H20260902-104",
+      "date": "2026-09-02",
+      "hypothesis": "今日上证收盘低于3941（昨日区间下沿），则弱势延续",
+      "verify_date": "2026-09-02",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "down",
+      "threshold": 3941.07
+    },
+    {
+      "id": "H20260902-105",
+      "date": "2026-09-02",
+      "hypothesis": "今日涨停家数低于29只（昨日冰点），则情绪进一步恶化",
+      "verify_date": "2026-09-02",
+      "result": "pending",
+      "evidence": "",
+      "category": "count",
+      "direction": "down",
+      "threshold": 29
+    },
+    {
+      "id": "H20260902-106",
+      "date": "2026-09-02",
+      "hypothesis": "中天科技今日收盘低于33.61（昨收），则二次减仓区触发概率上升",
+      "verify_date": "2026-09-02",
+      "result": "pending",
+      "evidence": "",
+      "category": "stock",
+      "target": "sh600522",
+      "direction": "down",
+      "threshold": 33.61
     }
   ]
 }

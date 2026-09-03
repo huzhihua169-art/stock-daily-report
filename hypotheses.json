@@ -1183,6 +1183,42 @@
       "target": "sh600522",
       "direction": "down",
       "threshold": 33.61
+    },
+    {
+      "id": "H20260903-110",
+      "date": "2026-09-03",
+      "hypothesis": "今日上证指数收盘涨跌幅不超过±0.5%（窄幅震荡）",
+      "verify_date": "2026-09-03",
+      "result": "pending",
+      "evidence": "",
+      "category": "index",
+      "target": "sh000001",
+      "direction": "up",
+      "threshold": 0.5
+    },
+    {
+      "id": "H20260903-111",
+      "date": "2026-09-03",
+      "hypothesis": "今日涨停家数仍低于40只（情绪冰点延续）",
+      "verify_date": "2026-09-03",
+      "result": "pending",
+      "evidence": "",
+      "category": "count",
+      "target": "null",
+      "direction": "down",
+      "threshold": 40
+    },
+    {
+      "id": "H20260903-112",
+      "date": "2026-09-03",
+      "hypothesis": "影视院线板块（欢瑞世纪4连板）今日涨幅收窄或回调",
+      "verify_date": "2026-09-03",
+      "result": "pending",
+      "evidence": "",
+      "category": "sector",
+      "target": "影视院线",
+      "direction": "down",
+      "threshold": 1.0
     }
   ]
 }
